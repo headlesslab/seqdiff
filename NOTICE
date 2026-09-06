@@ -1,0 +1,8 @@
+seqdiff
+Copyright 2026 headlesslab
+
+This product is derived from the lib/lcs package of got (https://github.com/ysmood/got),
+Copyright 2020 Yad Smood, licensed under the MIT License (see LICENSE).
+seqdiff's initial code is a snapshot of got v0.40.0, tag v0.40.0, commit
+abba87a7846a0f03b3f6384549694a33873733b7 (2024-06-13), imported without
+git history. Later changes are seqdiff's own.

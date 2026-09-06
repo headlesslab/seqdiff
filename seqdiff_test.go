@@ -1,4 +1,4 @@
-package lcs_test
+package seqdiff_test
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ysmood/got"
-	"github.com/ysmood/got/lib/lcs"
+	"github.com/headlesslab/seqdiff"
 )
 
 var setup = got.Setup(func(g got.G) {
@@ -37,11 +37,11 @@ func TestLCS(t *testing.T) {
 			}
 		}()
 
-		xs, ys := lcs.NewChars(x), lcs.NewChars(y)
+		xs, ys := seqdiff.NewChars(x), seqdiff.NewChars(y)
 
 		s := xs.Sub(xs.YadLCS(context.Background(), ys))
 		out := s.String()
-		expected := lcs.StandardLCS(xs, ys).String()
+		expected := seqdiff.StandardLCS(xs, ys).String()
 
 		if !s.IsSubsequenceOf(xs) {
 			e(s.String(), "is not subsequence of", x)
@@ -79,9 +79,9 @@ func TestLCSLongContentSmallChange(t *testing.T) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		xs, ys := lcs.NewChars(x), lcs.NewChars(y)
-		lcs := xs.YadLCS(ctx, ys)
-		out := xs.Sub(lcs).String()
+		xs, ys := seqdiff.NewChars(x), seqdiff.NewChars(y)
+		seqdiff := xs.YadLCS(ctx, ys)
+		out := xs.Sub(seqdiff).String()
 
 		if out != expected {
 			t.Error(out, "!=", expected)
@@ -106,7 +106,7 @@ func TestContext(t *testing.T) {
 
 	c := g.Context()
 	c.Cancel()
-	l := lcs.NewChars("abc").YadLCS(c, lcs.NewChars("abc"))
+	l := seqdiff.NewChars("abc").YadLCS(c, seqdiff.NewChars("abc"))
 	g.Len(l, 0)
 }
 
@@ -117,8 +117,8 @@ func TestLongRandom(_ *testing.T) {
 
 	c := context.Background()
 
-	xs := lcs.NewChars(x)
-	ys := lcs.NewChars(y)
+	xs := seqdiff.NewChars(x)
+	ys := seqdiff.NewChars(y)
 	xs.YadLCS(c, ys)
 }
 

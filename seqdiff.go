@@ -1,5 +1,6 @@
-// Package lcs ...
-package lcs
+// Package seqdiff computes the longest common subsequence of two sequences
+// of characters, words or lines.
+package seqdiff
 
 import (
 	"context"
