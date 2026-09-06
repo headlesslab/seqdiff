@@ -1,22 +1,24 @@
 package seqdiff_test
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/ysmood/got"
 	"github.com/headlesslab/seqdiff"
 )
 
 func TestSplit(t *testing.T) {
-	g := got.T(t)
-
-	g.Len(seqdiff.Split(""), 0)
+	if out := seqdiff.Split(""); len(out) != 0 {
+		t.Fatalf("Split(%q) = %q, want no words", "", out)
+	}
 
 	check := func(in string, expect ...string) {
-		g.Helper()
+		t.Helper()
 		out := seqdiff.Split(strings.Repeat("\t", 100) + in)[100:]
-		g.Eq(out, expect)
+		if !reflect.DeepEqual(out, expect) {
+			t.Errorf("Split(%q) = %q, want %q", in, out, expect)
+		}
 	}
 
 	check("find a place to eat 热干面",
@@ -36,25 +38,35 @@ func TestSplit(t *testing.T) {
 }
 
 func TestIsSubsequenceOf(t *testing.T) {
-	g := got.T(t)
-
 	y := seqdiff.NewChars("abc")
 
-	g.True(seqdiff.NewChars("ab").IsSubsequenceOf(y))
-	g.True(seqdiff.NewChars("ac").IsSubsequenceOf(y))
-	g.True(seqdiff.NewChars("bc").IsSubsequenceOf(y))
-	g.False(seqdiff.NewChars("cb").IsSubsequenceOf(y))
-	g.False(seqdiff.NewChars("ba").IsSubsequenceOf(y))
-	g.False(seqdiff.NewChars("ca").IsSubsequenceOf(y))
+	for _, x := range []string{"ab", "ac", "bc"} {
+		if !seqdiff.NewChars(x).IsSubsequenceOf(y) {
+			t.Errorf("%q should be a subsequence of %q", x, "abc")
+		}
+	}
+	for _, x := range []string{"cb", "ba", "ca"} {
+		if seqdiff.NewChars(x).IsSubsequenceOf(y) {
+			t.Errorf("%q should not be a subsequence of %q", x, "abc")
+		}
+	}
 }
 
 func TestNew(t *testing.T) {
-	g := setup(t)
-	g.Len(seqdiff.NewLines("a"), 1)
-	g.Len(seqdiff.NewLines("a\n"), 2)
-	g.Len(seqdiff.NewLines("a\n\n"), 3)
-	g.Len(seqdiff.NewLines("\na"), 2)
-	g.Eq(seqdiff.NewLines("\nabc\nabc").String(), "\nabc\nabc")
+	lenIs := func(s seqdiff.Sequence, n int) {
+		t.Helper()
+		if len(s) != n {
+			t.Errorf("len(%q) = %d, want %d", s.String(), len(s), n)
+		}
+	}
 
-	g.Len(seqdiff.NewWords([]string{"a", "b"}), 2)
+	lenIs(seqdiff.NewLines("a"), 1)
+	lenIs(seqdiff.NewLines("a\n"), 2)
+	lenIs(seqdiff.NewLines("a\n\n"), 3)
+	lenIs(seqdiff.NewLines("\na"), 2)
+	if got := seqdiff.NewLines("\nabc\nabc").String(); got != "\nabc\nabc" {
+		t.Errorf("NewLines(...).String() = %q, want %q", got, "\nabc\nabc")
+	}
+
+	lenIs(seqdiff.NewWords([]string{"a", "b"}), 2)
 }

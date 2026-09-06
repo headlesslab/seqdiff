@@ -4,21 +4,15 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	mrand "math/rand"
 	"runtime/debug"
 	"testing"
 	"time"
 
-	"github.com/ysmood/got"
 	"github.com/headlesslab/seqdiff"
 )
 
-var setup = got.Setup(func(g got.G) {
-	g.ErrorHandler = got.NewDefaultAssertionError(nil, nil)
-})
-
 func TestLCS(t *testing.T) {
-	g := got.T(t)
-
 	check := func(i int, x, y string) {
 		t.Helper()
 
@@ -60,7 +54,7 @@ func TestLCS(t *testing.T) {
 		const c = 8
 		b := make([]byte, c)
 		for i := 0; i < c; i++ {
-			b[i] = byte('a' + g.RandInt(0, c))
+			b[i] = byte('a' + mrand.Intn(c))
 		}
 		return string(b)
 	}
@@ -80,8 +74,8 @@ func TestLCSLongContentSmallChange(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		xs, ys := seqdiff.NewChars(x), seqdiff.NewChars(y)
-		seqdiff := xs.YadLCS(ctx, ys)
-		out := xs.Sub(seqdiff).String()
+		idx := xs.YadLCS(ctx, ys)
+		out := xs.Sub(idx).String()
 
 		if out != expected {
 			t.Error(out, "!=", expected)
@@ -102,12 +96,12 @@ func TestLCSLongContentSmallChange(t *testing.T) {
 }
 
 func TestContext(t *testing.T) {
-	g := got.T(t)
-
-	c := g.Context()
-	c.Cancel()
-	l := seqdiff.NewChars("abc").YadLCS(c, seqdiff.NewChars("abc"))
-	g.Len(l, 0)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	l := seqdiff.NewChars("abc").YadLCS(ctx, seqdiff.NewChars("abc"))
+	if len(l) != 0 {
+		t.Fatalf("a cancelled context should yield no indices, got %v", l)
+	}
 }
 
 func TestLongRandom(_ *testing.T) {

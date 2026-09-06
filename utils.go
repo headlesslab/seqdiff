@@ -4,13 +4,6 @@ import (
 	"strings"
 )
 
-func min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
 func eq(x, y Comparable) bool {
 	return x.String() == y.String()
 }
